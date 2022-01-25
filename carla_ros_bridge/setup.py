@@ -37,5 +37,5 @@ elif ROS_VERSION == 2:
         },
         package_dir={'': 'src'},
         package_data={'': ['CARLA_VERSION']},
-        include_package_data=True
+        #include_package_data=True
     )

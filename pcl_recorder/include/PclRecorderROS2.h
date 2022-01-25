@@ -12,6 +12,10 @@
 #include <tf2_ros/transform_listener.h>
 #include <tf2_eigen/tf2_eigen.h>
 #include <rclcpp/time_source.hpp>
+#ifdef _WIN32
+#include <shellapi.h>
+#endif
+#include <rcpputils/filesystem_helper.hpp>
 
 class PclRecorderROS2 : public rclcpp::Node
 {
@@ -26,5 +30,6 @@ private:
   std::unique_ptr<tf2_ros::Buffer> tf_buffer_ = nullptr;
   tf2_ros::TransformListener *tfListener;
   static constexpr const char* fixed_frame_ = "map";
-
+  rcpputils::fs::path storage_dir_{rcpputils::fs::temp_directory_path() / "pcl_capture"};
 };
+

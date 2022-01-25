@@ -17,9 +17,7 @@ PclRecorderROS2::PclRecorderROS2() : Node("pcl_recorder")
   tf_buffer_ = std::make_unique<tf2_ros::Buffer>(this->get_clock());
   tfListener = new tf2_ros::TransformListener(*tf_buffer_);
 
-  if (mkdir("/tmp/pcl_capture", 0777) == -1) {
-    RCLCPP_WARN(this->get_logger(), "Could not create directory!");
-  }
+  rcpputils::fs::create_directories(storage_dir_);
 
   // Create a ROS subscriber for the input point cloud
   std::string roleName;
@@ -37,13 +35,15 @@ void PclRecorderROS2::callback(const sensor_msgs::msg::PointCloud2::SharedPtr cl
     return;
   }
 
+  rcpputils::fs::path outpath = storage_dir_;
   std::stringstream ss;
-  ss << "/tmp/pcl_capture/capture" << cloud->header.stamp.sec << cloud->header.stamp.nanosec << ".pcd";
+  ss << "capture" << cloud->header.stamp.sec << cloud->header.stamp.nanosec << ".pcd";
+  outpath /= ss.str();
 
 
   RCLCPP_INFO (this->get_logger(), "Received %d data points. Storing in %s",
            (int)cloud->width * cloud->height,
-           ss.str().c_str());
+           outpath.string());
 
   Eigen::Affine3d transform;
   try {
@@ -56,7 +56,7 @@ void PclRecorderROS2::callback(const sensor_msgs::msg::PointCloud2::SharedPtr cl
     pcl::transformPointCloud (pclCloud, transformedCloud, transform);
 
     pcl::PCDWriter writer;
-    writer.writeBinary(ss.str(), transformedCloud);
+    writer.writeBinary(outpath.string(), transformedCloud);
   }
   catch (tf2::TransformException &ex)
   {

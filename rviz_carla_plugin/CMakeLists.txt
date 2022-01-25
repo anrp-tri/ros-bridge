@@ -66,7 +66,7 @@ elseif(${ROS_VERSION} EQUAL 2)
   add_library(${PROJECT_NAME} SHARED ${SRC_FILES})
 
   target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES}
-                        rviz_ogre_vendor::OgreMain)
+                        rviz_common::rviz_common)
 
   target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_14)
 
