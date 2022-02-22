@@ -18,6 +18,7 @@ def generate_launch_description():
                 text=str((object_spawn_path / "config" / "object_sensor_only.json").absolute())
             ),
             "spawn_sensors_only": TextSubstitution(text="true"),
+            "spawn_point_ego_vehicle": "dummy",
         }.items(),
     )
     ld = launch.LaunchDescription(
