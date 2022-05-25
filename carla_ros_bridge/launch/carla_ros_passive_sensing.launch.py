@@ -72,6 +72,7 @@ def generate_launch_description():
                 parameters=[
                     # TODO(andrew.best): Perhaps this solves our problems w.r.t to time?
                     {"use_sim_time": True},
+                    {"publish_clock": False},
                     {"host": launch.substitutions.LaunchConfiguration("host")},
                     {"port": launch.substitutions.LaunchConfiguration("port")},
                     {"timeout": launch.substitutions.LaunchConfiguration("timeout")},
