@@ -70,7 +70,6 @@ class CarlaRosBridge(CompatibleNode):
         self.parameters = params
         self.carla_world = carla_world
 
-        self.ros_timestamp = roscomp.ros_timestamp()
         self.callback_group = roscomp.callback_groups.ReentrantCallbackGroup()
 
         self.synchronous_mode_update_thread = None
@@ -113,7 +112,13 @@ class CarlaRosBridge(CompatibleNode):
         self.debug_helper = DebugHelper(carla_world.debug, self)
 
         # Communication topics
-        self.clock_publisher = self.new_publisher(Clock, 'clock', 10)
+        if self.parameters["publish_clock"]:
+            self.get_logger().info("Publishing clock.")
+            self.ros_timestamp = roscomp.ros_timestamp()
+            self.clock_publisher = self.new_publisher(Clock, 'clock', 10)
+        else:
+            self.ros_timestamp = None
+            self.clock_publisher = None
 
         self.status_publisher = CarlaStatusPublisher(
             self.carla_settings.synchronous_mode,
@@ -335,6 +340,10 @@ class CarlaRosBridge(CompatibleNode):
         :type carla_timestamp: carla.Timestamp
         :return:
         """
+
+        if not self.parameters["publish_clock"]:
+            return
+
         if roscomp.ok():
             self.ros_timestamp = roscomp.ros_timestamp(carla_timestamp.elapsed_seconds, from_sec=True)
             self.clock_publisher.publish(Clock(clock=self.ros_timestamp))
@@ -391,6 +400,7 @@ def main(args=None):
     parameters['port'] = carla_bridge.get_param('port', 2000)
     parameters['timeout'] = carla_bridge.get_param('timeout', 2)
     parameters['passive'] = carla_bridge.get_param('passive', False)
+    parameters['publish_clock'] = carla_bridge.get_param('publish_clock', False)
     parameters['synchronous_mode'] = carla_bridge.get_param('synchronous_mode', True)
     parameters['synchronous_mode_wait_for_vehicle_control_command'] = carla_bridge.get_param(
         'synchronous_mode_wait_for_vehicle_control_command', False)
