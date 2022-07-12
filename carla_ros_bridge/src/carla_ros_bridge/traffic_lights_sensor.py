@@ -14,10 +14,10 @@ from ros_compatibility.qos import QoSProfile, DurabilityPolicy
 from carla_ros_bridge.pseudo_actor import PseudoActor
 from carla_ros_bridge.traffic import TrafficLight
 
-from carla_msgs.msg import (
-    CarlaTrafficLightStatusList,
-    CarlaTrafficLightInfoList
-)
+from carla_msgs.msg import CarlaTrafficLightStatusList, CarlaTrafficLightInfoList
+
+# Publish info no less frequently than this.
+_PUBLISH_INTERVAL_SECONDS = 5.0
 
 
 class TrafficLightsSensor(PseudoActor):
@@ -40,23 +40,23 @@ class TrafficLightsSensor(PseudoActor):
         :type actor_list: map(carla-actor-id -> python-actor-object)
         """
 
-        super(TrafficLightsSensor, self).__init__(uid=uid,
-                                                  name=name,
-                                                  parent=parent,
-                                                  node=node)
+        super(TrafficLightsSensor, self).__init__(uid=uid, name=name, parent=parent, node=node)
 
         self.actor_list = actor_list
         self.traffic_light_status = CarlaTrafficLightStatusList()
         self.traffic_light_actors = []
-
+        self._info_published_at = None
+        self._status_published_at = None
         self.traffic_lights_info_publisher = node.new_publisher(
             CarlaTrafficLightInfoList,
             self.get_topic_prefix() + "/info",
-            qos_profile=QoSProfile(depth=10, durability=DurabilityPolicy.TRANSIENT_LOCAL))
+            qos_profile=QoSProfile(depth=10, durability=DurabilityPolicy.TRANSIENT_LOCAL),
+        )
         self.traffic_lights_status_publisher = node.new_publisher(
             CarlaTrafficLightStatusList,
             self.get_topic_prefix() + "/status",
-            qos_profile=QoSProfile(depth=10, durability=DurabilityPolicy.TRANSIENT_LOCAL))
+            qos_profile=QoSProfile(depth=10, durability=DurabilityPolicy.TRANSIENT_LOCAL),
+        )
 
     def destroy(self):
         """
@@ -88,13 +88,23 @@ class TrafficLightsSensor(PseudoActor):
                 traffic_light_actors.append(actor)
                 traffic_light_status.traffic_lights.append(actor.get_status())
 
-        if traffic_light_actors != self.traffic_light_actors:
+        if (
+            traffic_light_actors != self.traffic_light_actors
+            or self._info_published_at is None
+            or timestamp - self._info_published_at > _PUBLISH_INTERVAL_SECONDS
+        ):
             self.traffic_light_actors = traffic_light_actors
             traffic_light_info_list = CarlaTrafficLightInfoList()
             for traffic_light in traffic_light_actors:
                 traffic_light_info_list.traffic_lights.append(traffic_light.get_info())
             self.traffic_lights_info_publisher.publish(traffic_light_info_list)
+            self._info_published_at = timestamp
 
-        if traffic_light_status != self.traffic_light_status:
+        if (
+            traffic_light_status != self.traffic_light_status
+            or self._status_published_at is None
+            or timestamp - self._status_published_at > _PUBLISH_INTERVAL_SECONDS
+        ):
             self.traffic_light_status = traffic_light_status
             self.traffic_lights_status_publisher.publish(traffic_light_status)
+            self._status_published_at = timestamp

@@ -8,6 +8,10 @@
         {
             "type": "sensor.pseudo.actor_list",
             "id": "actor_list"
+        },
+        {
+            "type": "sensor.pseudo.traffic_lights",
+            "id": "traffic_lights"
         }
     ]
 }
