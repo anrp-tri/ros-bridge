@@ -6,7 +6,7 @@
 # For a copy, see <https://opensource.org/licenses/MIT>.
 #
 """
-handle a opendrive sensor
+handle a opendrive sensor. Publish each _PUBLISH_INTERVAL_SECONDS seconds.
 """
 
 from carla_ros_bridge.pseudo_actor import PseudoActor
@@ -14,6 +14,8 @@ from carla_ros_bridge.pseudo_actor import PseudoActor
 from ros_compatibility.qos import QoSProfile, DurabilityPolicy
 
 from std_msgs.msg import String
+
+_PUBLISH_INTERVAL_SECONDS = 300.0
 
 
 class OpenDriveSensor(PseudoActor):
@@ -37,16 +39,14 @@ class OpenDriveSensor(PseudoActor):
         :param carla_map: carla map object
         :type carla_map: carla.Map
         """
-        super(OpenDriveSensor, self).__init__(uid=uid,
-                                              name=name,
-                                              parent=parent,
-                                              node=node)
+        super(OpenDriveSensor, self).__init__(uid=uid, name=name, parent=parent, node=node)
         self.carla_map = carla_map
-        self._map_published = False
+        self._map_published_at = None
         self.map_publisher = node.new_publisher(
             String,
             self.get_topic_prefix(),
-            qos_profile=QoSProfile(depth=10, durability=DurabilityPolicy.TRANSIENT_LOCAL))
+            qos_profile=QoSProfile(depth=10, durability=DurabilityPolicy.TRANSIENT_LOCAL),
+        )
 
     def destroy(self):
         super(OpenDriveSensor, self).destroy()
@@ -64,6 +64,6 @@ class OpenDriveSensor(PseudoActor):
         """
         Function (override) to update this object.
         """
-        if not self._map_published:
+        if self._map_published_at is None or timestamp - self._map_published_at > _PUBLISH_INTERVAL_SECONDS:
             self.map_publisher.publish(String(data=self.carla_map.to_opendrive()))
-            self._map_published = True
+            self._map_published_at = timestamp
