@@ -10,7 +10,7 @@ Rosbridge class:
 
 Class that handle communication between CARLA and ROS
 """
-
+import multiprocessing
 import os
 import pkg_resources
 try:
@@ -36,6 +36,10 @@ from carla_ros_bridge.world_info import WorldInfo
 from carla_msgs.msg import CarlaControl, CarlaWeatherParameters
 from carla_msgs.srv import SpawnObject, DestroyObject, GetBlueprints
 from rosgraph_msgs.msg import Clock
+
+
+# Cyclone DDS on large core counts will not play nicely. Limit process to 16 cores.
+WORKER_THREADS = 0 if multiprocessing.cpu_count() < 16 else 16
 
 
 class CarlaRosBridge(CompatibleNode):
@@ -418,7 +422,9 @@ def main(args=None):
     try:
         carla_client = carla.Client(
             host=parameters['host'],
-            port=parameters['port'])
+            port=parameters['port'],
+            worker_threads=WORKER_THREADS
+        )
         carla_client.set_timeout(parameters['timeout'])
 
         # check carla version
