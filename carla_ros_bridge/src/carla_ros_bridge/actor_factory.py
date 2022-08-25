@@ -43,6 +43,7 @@ from carla_ros_bridge.speedometer_sensor import SpeedometerSensor
 from carla_ros_bridge.tf_sensor import TFSensor
 from carla_ros_bridge.traffic import Traffic, TrafficLight
 from carla_ros_bridge.traffic_lights_sensor import TrafficLightsSensor
+from carla_ros_bridge.ego_traffic_light_sensor import EgoTrafficLightSensor
 from carla_ros_bridge.vehicle import Vehicle
 from carla_ros_bridge.walker import Walker
 
@@ -106,7 +107,7 @@ class ActorFactory(object):
         destroyed_actors = self._active_actors - current_actors
         self._active_actors = current_actors
 
-        # Create/destroy actors not managed by the bridge. 
+        # Create/destroy actors not managed by the bridge.
         self.lock.acquire()
         for actor_id in spawned_actors:
             carla_actor = self.world.get_actor(actor_id)
@@ -350,6 +351,16 @@ class ActorFactory(object):
                                  name=name,
                                  parent=parent,
                                  node=self.node)
+
+        elif type_id == EgoTrafficLightSensor.get_blueprint_name():
+            actor = EgoTrafficLightSensor(
+                uid=uid,
+                name=name,
+                parent=parent,
+                node=self.node,
+                actor_list=self.actors,
+                world=self.world
+            )
 
         elif carla_actor.type_id.startswith('traffic'):
             if carla_actor.type_id == "traffic.traffic_light":
