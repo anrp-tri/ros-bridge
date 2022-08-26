@@ -359,7 +359,7 @@ class ActorFactory(object):
                 parent=parent,
                 node=self.node,
                 actor_list=self.actors,
-                world=self.world
+                carla_map=self.world.get_map()
             )
 
         elif carla_actor.type_id.startswith('traffic'):
