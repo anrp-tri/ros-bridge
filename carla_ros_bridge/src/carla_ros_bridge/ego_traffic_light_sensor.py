@@ -137,20 +137,27 @@ class EgoTrafficLightSensor(PseudoActor):
                 or self._info_published_at is None
                 or timestamp - self._info_published_at > _PUBLISH_INTERVAL_SECONDS
             ):
-                self.cur_sli = sli
-                self.calculate_and_publish_data(ego_location, self.cur_sli, inside_intersection)
+                self.calculate_and_publish_data(ego_location, sli, inside_intersection)
                 self._info_published_at = timestamp
         except Exception as e:
             self.node.loginfo("Error: {}".format(e))
 
-    def calculate_and_publish_data(self, ego_location: carla.Location, stop_line_info: StoplineInfo, inside_intersection: bool):
+    def calculate_and_publish_data(self, ego_location: carla.Location, new_sli: StoplineInfo, inside_intersection: bool):
         """Publish CarlaEgoTrafficLightInfo message."""
-        if stop_line_info:
-            self.msg.distance_to_stopline = ego_location.distance(stop_line_info.stop_location)
-            self.msg.traffic_light_status = stop_line_info.traffic_light_actor.get_status()
-        else:
+        if inside_intersection:
             self.msg.distance_to_stopline = -1.0
-            self.msg.traffic_light_status = CarlaTrafficLightStatus()
+            if self.cur_sli:
+                self.msg.traffic_light_status = self.cur_sli.traffic_light_actor.get_status()
+        else:
+            if new_sli:
+                self.msg.distance_to_stopline = ego_location.distance(new_sli.stop_location)
+                self.msg.traffic_light_status = new_sli.traffic_light_actor.get_status()
+            else:
+                self.msg.distance_to_stopline = -1.0
+                self.msg.traffic_light_status = CarlaTrafficLightStatus()
+            # Store new StopLineInfo.
+            self.cur_sli = new_sli
+
         self.msg.inside_intersection = inside_intersection
         self.pub.publish(self.msg)
 
@@ -162,12 +169,9 @@ class EgoTrafficLightSensor(PseudoActor):
         return None
 
     def has_traffic_light_status_changes(self, cur_sli: StoplineInfo, new_sli: StoplineInfo):
-        """Return True if the StopLineInfo object has been changed or the traffic light status has been changed; False otherwise."""
-        if cur_sli is None and new_sli is None:
+        """Return True if the traffic light status (either new traffic light id or new state) has been changed; False otherwise."""
+        if cur_sli is None or new_sli is None:
             return False
-
-        if cur_sli != new_sli:
-            return True
 
         cur_status = cur_sli.traffic_light_actor.get_status()
         new_status = new_sli.traffic_light_actor.get_status()
