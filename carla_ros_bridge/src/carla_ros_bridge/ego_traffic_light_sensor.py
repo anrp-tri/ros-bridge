@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 
 from collections import defaultdict
-from typing import Dict, List
-from ros_compatibility.qos import QoSProfile, DurabilityPolicy
+from typing import Dict
 
 import carla
-
 from carla_msgs.msg import CarlaEgoTrafficLightInfo, CarlaTrafficLightStatus
+from ros_compatibility.node import CompatibleNode
+from ros_compatibility.qos import DurabilityPolicy, QoSProfile
+
 from carla_ros_bridge.actor import Actor
 from carla_ros_bridge.ego_vehicle import EgoVehicle
 from carla_ros_bridge.pseudo_actor import PseudoActor
 from carla_ros_bridge.traffic import TrafficLight
-from ros_compatibility.node import CompatibleNode
 
 # Publish info no less frequently than this.
 _PUBLISH_INTERVAL_SECONDS = 5.0
@@ -82,7 +82,7 @@ def get_stop_line_info(stop_line_infos: Dict[int,Dict[int, StoplineInfo]], road_
 class EgoTrafficLightSensor(PseudoActor):
     """A sensor to publish CarlaEgoTrafficLightInfo"""
 
-    def __init__(self, uid, name, parent, node, actor_list, carla_map):
+    def __init__(self, uid: int, name: str, parent: Actor, node: CompatibleNode, actor_list: Dict[int, Actor], carla_map: carla.Map):
         super(EgoTrafficLightSensor, self).__init__(uid=uid, name=name, parent=parent, node=node)
 
         self.pub = node.new_publisher(

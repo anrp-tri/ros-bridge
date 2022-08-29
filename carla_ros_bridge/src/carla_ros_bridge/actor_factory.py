@@ -25,6 +25,7 @@ from carla_ros_bridge.actor_control import ActorControl
 from carla_ros_bridge.actor_list_sensor import ActorListSensor
 from carla_ros_bridge.camera import Camera, RgbCamera, DepthCamera, SemanticSegmentationCamera, DVSCamera
 from carla_ros_bridge.collision_sensor import CollisionSensor
+from carla_ros_bridge.ego_traffic_light_sensor import EgoTrafficLightSensor
 from carla_ros_bridge.ego_vehicle import EgoVehicle
 from carla_ros_bridge.gnss import Gnss
 from carla_ros_bridge.imu import ImuSensor
@@ -43,7 +44,6 @@ from carla_ros_bridge.speedometer_sensor import SpeedometerSensor
 from carla_ros_bridge.tf_sensor import TFSensor
 from carla_ros_bridge.traffic import Traffic, TrafficLight
 from carla_ros_bridge.traffic_lights_sensor import TrafficLightsSensor
-from carla_ros_bridge.ego_traffic_light_sensor import EgoTrafficLightSensor
 from carla_ros_bridge.vehicle import Vehicle
 from carla_ros_bridge.walker import Walker
 
