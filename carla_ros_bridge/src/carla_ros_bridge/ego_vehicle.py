@@ -13,7 +13,7 @@ import math
 import os
 
 import numpy
-from carla import VehicleControl
+from carla import VehicleControl, VehicleWheelLocation
 
 from ros_compatibility.qos import QoSProfile, DurabilityPolicy
 
@@ -23,10 +23,12 @@ from carla_msgs.msg import (
     CarlaEgoVehicleInfo,
     CarlaEgoVehicleInfoWheel,
     CarlaEgoVehicleControl,
-    CarlaEgoVehicleStatus
+    CarlaEgoVehicleStatus,
+    CarlaVehicleWheelStatus
 )
 from std_msgs.msg import Bool  # pylint: disable=import-error
 from std_msgs.msg import ColorRGBA  # pylint: disable=import-error
+from geometry_msgs.msg import Vector3  # pylint: disable=import-error
 
 
 class EgoVehicle(Vehicle):
@@ -127,6 +129,17 @@ class EgoVehicle(Vehicle):
         vehicle_status.control.reverse = self.carla_actor.get_control().reverse
         vehicle_status.control.gear = self.carla_actor.get_control().gear
         vehicle_status.control.manual_gear_shift = self.carla_actor.get_control().manual_gear_shift
+        for wheel_idx in range(4):
+            wheel_location = VehicleWheelLocation(wheel_idx)
+            wheel_status = CarlaVehicleWheelStatus()
+            carla_vel = self.carla_actor.get_wheel_velocity(wheel_location)
+            ros_vel = Vector3()
+            ros_vel.x, ros_vel.y, ros_vel.z = carla_vel.x, carla_vel.y, carla_vel.z
+            wheel_status.velocity = ros_vel
+            wheel_status.steer_angle = self.carla_actor.get_wheel_steer_angle(wheel_location)
+            wheel_status.pitch_angle = self.carla_actor.get_wheel_pitch_angle(wheel_location)
+            wheel_status.height = self.carla_actor.get_wheel_height(wheel_location)
+            vehicle_status.wheels.append(wheel_status)
         self.vehicle_status_publisher.publish(vehicle_status)
 
         # only send vehicle once (in latched-mode)
