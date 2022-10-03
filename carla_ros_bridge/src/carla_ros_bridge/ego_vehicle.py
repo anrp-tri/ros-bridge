@@ -132,13 +132,12 @@ class EgoVehicle(Vehicle):
         for wheel_idx in range(4):
             wheel_location = VehicleWheelLocation(wheel_idx)
             wheel_status = CarlaVehicleWheelStatus()
-            carla_vel = self.carla_actor.get_wheel_velocity(wheel_location)
-            ros_vel = Vector3()
-            ros_vel.x, ros_vel.y, ros_vel.z = carla_vel.x, carla_vel.y, carla_vel.z
-            wheel_status.velocity = ros_vel
+            wheel_status.speed = self.carla_actor.get_wheel_speed(wheel_location) * 30.0 / math.pi
             wheel_status.steer_angle = self.carla_actor.get_wheel_steer_angle(wheel_location)
             wheel_status.pitch_angle = self.carla_actor.get_wheel_pitch_angle(wheel_location)
             wheel_status.height = self.carla_actor.get_wheel_height(wheel_location)
+            wheel_status.lat_slip = self.carla_actor.get_wheel_lat_slip(wheel_location) * 180 / math.pi
+            wheel_status.long_slip = self.carla_actor.get_wheel_long_slip(wheel_location)
             vehicle_status.wheels.append(wheel_status)
         self.vehicle_status_publisher.publish(vehicle_status)
 
