@@ -28,7 +28,6 @@ from carla_msgs.msg import (
 )
 from std_msgs.msg import Bool  # pylint: disable=import-error
 from std_msgs.msg import ColorRGBA  # pylint: disable=import-error
-from geometry_msgs.msg import Vector3  # pylint: disable=import-error
 
 
 class EgoVehicle(Vehicle):
