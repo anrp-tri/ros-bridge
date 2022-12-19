@@ -13,7 +13,7 @@ import math
 import os
 
 import numpy
-from carla import VehicleControl
+from carla import VehicleControl, VehicleWheelLocation
 
 from ros_compatibility.qos import QoSProfile, DurabilityPolicy
 
@@ -23,7 +23,8 @@ from carla_msgs.msg import (
     CarlaEgoVehicleInfo,
     CarlaEgoVehicleInfoWheel,
     CarlaEgoVehicleControl,
-    CarlaEgoVehicleStatus
+    CarlaEgoVehicleStatus,
+    CarlaVehicleWheelStatus
 )
 from std_msgs.msg import Bool  # pylint: disable=import-error
 from std_msgs.msg import ColorRGBA  # pylint: disable=import-error
@@ -127,6 +128,16 @@ class EgoVehicle(Vehicle):
         vehicle_status.control.reverse = self.carla_actor.get_control().reverse
         vehicle_status.control.gear = self.carla_actor.get_control().gear
         vehicle_status.control.manual_gear_shift = self.carla_actor.get_control().manual_gear_shift
+        for wheel_idx in range(4):
+            wheel_location = VehicleWheelLocation(wheel_idx)
+            wheel_status = CarlaVehicleWheelStatus()
+            wheel_status.speed = self.carla_actor.get_wheel_speed(wheel_location)
+            wheel_status.steer_angle = self.carla_actor.get_wheel_steer_angle(wheel_location)
+            wheel_status.pitch_angle = self.carla_actor.get_wheel_pitch_angle(wheel_location)
+            wheel_status.height = self.carla_actor.get_wheel_height(wheel_location)
+            wheel_status.lat_slip_angle = self.carla_actor.get_wheel_lat_slip(wheel_location)
+            wheel_status.long_slip_ratio = self.carla_actor.get_wheel_long_slip(wheel_location)
+            vehicle_status.wheels.append(wheel_status)
         self.vehicle_status_publisher.publish(vehicle_status)
 
         # only send vehicle once (in latched-mode)
