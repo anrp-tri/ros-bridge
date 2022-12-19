@@ -251,6 +251,9 @@ class ActorFactory(object):
             parent_id = parent.uid
 
         name = carla_actor.attributes.get("role_name", "")
+        if "_no_ros_bridge" in name:
+            return
+
         if not name:
             name = str(carla_actor.id)
         obj = self._create_object(carla_actor.id, carla_actor.type_id, name,
