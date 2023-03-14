@@ -68,6 +68,25 @@ elseif(${ROS_VERSION} EQUAL 2)
     REQUIRED)
   find_package(PCL REQUIRED COMPONENTS common io)
 
+    if (WIN32)
+        if ($ENV{ROS_DISTRO} STREQUAL "humble")
+            if (NOT PCL_COMMON_LIBRARY)
+                set(PCL_COMMON_LIBRARY C:/opt/ros/humble/x64/Lib/pcl_common.lib)
+            endif()
+            if (NOT PCL_IO_LIBRARY)
+                set(PCL_IO_LIBRARY C:/opt/ros/humble/x64/Lib/pcl_io.lib)
+            endif()
+        endif()
+        if ($ENV{ROS_DISTRO} STREQUAL "foxy")
+            if (NOT PCL_COMMON_LIBRARY)
+                set(PCL_COMMON_LIBRARY C:/opt/ros/foxy/x64/Lib/pcl_common_release.lib)
+            endif()
+            if (NOT PCL_IO_LIBRARY)
+                set(PCL_IO_LIBRARY C:/opt/ros/foxy/x64/Lib/pcl_io_release.lib)
+            endif()
+        endif()
+    endif()
+
   include_directories(include ${PCL_INCLUDE_DIRS})
 
   add_executable(${PROJECT_NAME}_node src/PclRecorderROS2.cpp src/mainROS2.cpp)
@@ -76,7 +95,7 @@ elseif(${ROS_VERSION} EQUAL 2)
                             pcl_conversions tf2_ros tf2)
 
   target_link_libraries(${PROJECT_NAME}_node ${Boost_SYSTEM_LIBRARY}
-                        ${PCL_LIBRARIES})
+      ${PCL_LIBRARIES} ${PCL_IO_LIBRARY} ${PCL_COMMON_LIBRARY})
 
   target_compile_features(
     ${PROJECT_NAME}_node
