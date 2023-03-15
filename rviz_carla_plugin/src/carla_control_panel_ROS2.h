@@ -19,6 +19,12 @@
 #include <carla_ros_scenario_runner_types/srv/execute_scenario.hpp>
 #include <geometry_msgs/msg/pose.hpp>
 #include <geometry_msgs/msg/twist.hpp>
+#ifdef ROS_DISTRO_HUMBLE
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#endif
+#ifdef ROS_DISTRO_FOXY
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#endif
 #include "rviz_common/ros_integration/ros_node_abstraction_iface.hpp"
 #include <rviz_common/frame_position_tracking_view_controller.hpp>
 

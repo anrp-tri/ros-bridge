@@ -63,6 +63,14 @@ elseif(${ROS_VERSION} EQUAL 2)
 
   qt5_add_resources(SRC_FILES rviz_carla_plugin.qrc)
 
+  if($ENV{ROS_DISTRO} STREQUAL "humble")
+    add_compile_definitions(ROS_DISTRO_HUMBLE=1)
+  elseif($ENV{ROS_DISTRO} STREQUAL "foxy")
+    add_compile_definitions(ROS_DISTRO_FOXY=1)
+  else()
+    message(FATAL_ERROR "Unsupported ROS2 version (or you're trying to build this outside of a ROS2 workspace)")
+  endif()
+
   add_library(${PROJECT_NAME} SHARED ${SRC_FILES})
 
   target_link_libraries(${PROJECT_NAME} ${QT_LIBRARIES}
