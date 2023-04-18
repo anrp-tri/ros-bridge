@@ -11,7 +11,7 @@ if ROS_VERSION == 1:
     from distutils.core import setup
     from catkin_pkg.python_setup import generate_distutils_setup
 
-    d = generate_distutils_setup(packages=["carla_spawn_objects"], package_dir={"": "src"})
+    d = generate_distutils_setup(packages=["carla_spawn_objects"], package_dir={"": "carla_spawn_objects"})
 
     setup(**d)
 
@@ -27,7 +27,7 @@ elif ROS_VERSION == 2:
     setup(
         name=package_name,
         version="0.0.0",
-        packages=["src/" + package_name],
+        packages=[package_name],
         data_files=[
             ("share/ament_index/resource_index/packages", ["resource/" + package_name]),
             (share_root, ["package.xml"]),
@@ -43,8 +43,8 @@ elif ROS_VERSION == 2:
         tests_require=["pytest"],
         entry_points={
             "console_scripts": [
-                "carla_spawn_objects = src.carla_spawn_objects.carla_spawn_objects:main",
-                "set_initial_pose = src.carla_spawn_objects.set_initial_pose:main",
+                "carla_spawn_objects = carla_spawn_objects.carla_spawn_objects:main",
+                "set_initial_pose = carla_spawn_objects.set_initial_pose:main",
             ]
         },
     )
