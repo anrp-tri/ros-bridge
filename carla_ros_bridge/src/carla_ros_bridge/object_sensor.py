@@ -12,8 +12,12 @@ handle a object sensor
 from carla_ros_bridge.pseudo_actor import PseudoActor
 from carla_ros_bridge.vehicle import Vehicle
 from carla_ros_bridge.walker import Walker
+from carla_ros_bridge.actor import Actor
 
+from derived_object_msgs.msg import Object
 from derived_object_msgs.msg import ObjectArray
+
+from shape_msgs.msg import SolidPrimitive
 
 
 class ObjectSensor(PseudoActor):
@@ -81,4 +85,31 @@ class ObjectSensor(PseudoActor):
                     ros_objects.objects.append(actor.get_object_info())
                 elif isinstance(actor, Walker):
                     ros_objects.objects.append(actor.get_object_info())
+                elif isinstance(actor, Actor):
+                    # Add `hmi` type to the object array or any actors with the `published_info` attribute set to True.
+                    if actor.carla_actor.type_id.startswith("hmi"):
+                        ros_objects.objects.append(self.create_object_info(actor))
+                    elif actor.carla_actor.attributes.get("published_info", "False") == "True":
+                        ros_objects.objects.append(self.create_object_info(actor))
+
         self.object_publisher.publish(ros_objects)
+
+    # Copy from traffic_participant.get_object_info()
+    def create_object_info(self, actor):
+        obj = Object(header=self.get_msg_header("map"))
+        # ID
+        obj.id = actor.get_id()
+        # Pose
+        obj.pose = actor.get_current_ros_pose()
+        # Twist
+        obj.twist = actor.get_current_ros_twist()
+        # Acceleration
+        obj.accel = actor.get_current_ros_accel()
+        # Shape
+        obj.shape.type = SolidPrimitive.BOX
+        obj.shape.dimensions.extend([
+            actor.carla_actor.bounding_box.extent.x * 2.0,
+            actor.carla_actor.bounding_box.extent.y * 2.0,
+            actor.carla_actor.bounding_box.extent.z * 2.0])
+
+        return obj
