@@ -402,7 +402,7 @@ def main(args=None):
 
     parameters['host'] = carla_bridge.get_param('host', 'localhost')
     parameters['port'] = carla_bridge.get_param('port', 2000)
-    parameters['timeout'] = carla_bridge.get_param('timeout', 2)
+    parameters['timeout'] = carla_bridge.get_param('timeout', 10)
     parameters['passive'] = carla_bridge.get_param('passive', False)
     parameters['publish_clock'] = carla_bridge.get_param('publish_clock', False)
     parameters['synchronous_mode'] = carla_bridge.get_param('synchronous_mode', True)
