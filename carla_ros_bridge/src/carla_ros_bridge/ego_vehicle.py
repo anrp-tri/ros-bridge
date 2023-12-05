@@ -29,6 +29,7 @@ from carla_msgs.msg import (
 from std_msgs.msg import Bool  # pylint: disable=import-error
 from std_msgs.msg import ColorRGBA  # pylint: disable=import-error
 
+VEHICLE_INFO_RESET_TIME = 10.0
 
 class EgoVehicle(Vehicle):
 
@@ -94,6 +95,9 @@ class EgoVehicle(Vehicle):
             self.get_topic_prefix() + "/enable_autopilot",
             self.enable_autopilot_updated,
             qos_profile=10)
+        
+        # Reset vehicle info publisher every VEHICLE_INFO_RESET_TIME seconds.
+        self.vehicle_info_timer = node.create_timer(VEHICLE_INFO_RESET_TIME, self._reset_vehicle_info_published)
 
     def get_marker_color(self):
         """
@@ -140,7 +144,7 @@ class EgoVehicle(Vehicle):
             vehicle_status.wheels.append(wheel_status)
         self.vehicle_status_publisher.publish(vehicle_status)
 
-        # only send vehicle once (in latched-mode)
+        # only send vehicle once per VEHICLE_INFO_RESET_TIME seconds (in latched-mode)
         if not self.vehicle_info_published:
             self.vehicle_info_published = True
             vehicle_info = CarlaEgoVehicleInfo()
@@ -188,6 +192,9 @@ class EgoVehicle(Vehicle):
 
             self.vehicle_info_publisher.publish(vehicle_info)
 
+    def _reset_vehicle_info_published(self):
+        self.vehicle_info_published = False
+
     def update(self, frame, timestamp):
         """
         Function (override) to update this object.
@@ -209,6 +216,7 @@ class EgoVehicle(Vehicle):
         :return:
         """
         self.node.logdebug("Destroy Vehicle(id={})".format(self.get_id()))
+        self.vehicle_info_timer.cancel()
         self.node.destroy_subscription(self.control_subscriber)
         self.node.destroy_subscription(self.enable_autopilot_subscriber)
         self.node.destroy_subscription(self.control_override_subscriber)
