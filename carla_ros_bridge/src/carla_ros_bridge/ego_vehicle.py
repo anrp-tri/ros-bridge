@@ -123,6 +123,7 @@ class EgoVehicle(Vehicle):
         vehicle_status = CarlaEgoVehicleStatus(
             header=self.get_msg_header("map", timestamp=timestamp))
         vehicle_status.velocity = self.get_vehicle_speed_abs(self.carla_actor)
+        vehicle_status.engine_rotation_speed = self.carla_actor.get_engine_rotation_speed()
         vehicle_status.acceleration.linear = self.get_current_ros_accel().linear
         vehicle_status.orientation = self.get_current_ros_pose().orientation
         vehicle_status.control.throttle = self.carla_actor.get_control().throttle
