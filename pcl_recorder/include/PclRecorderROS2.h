@@ -10,7 +10,7 @@
 #include <pcl_conversions/pcl_conversions.h>
 #include <tf2_ros/buffer.h>
 #include <tf2_ros/transform_listener.h>
-#if defined(ROS_DISTRO_HUMBLE)
+#if defined(ROS_DISTRO_HUMBLE) || defined(ROS_DISTRO_JAZZY)
 #include <tf2_eigen/tf2_eigen.hpp>
 #elif defined(ROS_DISTRO_FOXY)
 #include <tf2_eigen/tf2_eigen.h>

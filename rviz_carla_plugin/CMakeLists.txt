@@ -52,6 +52,7 @@ elseif(${ROS_VERSION} EQUAL 2)
   find_package(carla_ros_scenario_runner_types COMPONENTS)
   find_package(pluginlib REQUIRED)
   find_package(rviz_ogre_vendor REQUIRED)
+  find_package(tf2_geometry_msgs REQUIRED)
 
   set(CMAKE_AUTOMOC ON)
 
@@ -63,7 +64,9 @@ elseif(${ROS_VERSION} EQUAL 2)
 
   qt5_add_resources(SRC_FILES rviz_carla_plugin.qrc)
 
-  if($ENV{ROS_DISTRO} STREQUAL "humble")
+  if($ENV{ROS_DISTRO} STREQUAL "jazzy")
+    add_compile_definitions(ROS_DISTRO_JAZZY=1)
+  elseif($ENV{ROS_DISTRO} STREQUAL "humble")
     add_compile_definitions(ROS_DISTRO_HUMBLE=1)
   elseif($ENV{ROS_DISTRO} STREQUAL "foxy")
     add_compile_definitions(ROS_DISTRO_FOXY=1)
@@ -82,7 +85,7 @@ elseif(${ROS_VERSION} EQUAL 2)
                                            plugin_description_ros2.xml)
 
   ament_target_dependencies(rviz_carla_plugin rclcpp carla_msgs nav_msgs
-                            carla_ros_scenario_runner_types)
+                            carla_ros_scenario_runner_types tf2_geometry_msgs)
 
   ament_export_libraries(${PROJECT_NAME})
 
